@@ -1,4 +1,4 @@
-name: Sync and merge upstream repository with your current repository
+name: Sync and upstream repository with your current public or private repository
 description: Syncs and merges your current repository with the upstream repository. Fork of https://github.com/mheene/sync-upstream-repo.
 author: Dabreadman
 
