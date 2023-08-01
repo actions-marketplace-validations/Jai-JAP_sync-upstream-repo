@@ -11,6 +11,11 @@ MERGE_ARGS=$6
 PUSH_ARGS=$7
 SPAWN_LOGS=$8
 
+if [[ -z "$GITHUB_TOKEN" ]]; then
+  echo "Missing \$GITHUB_TOKEN"
+  exit1
+fi
+
 if [[ -z "$UPSTREAM_REPO" ]]; then
   echo "Missing \$UPSTREAM_REPO"
   exit 1
@@ -19,7 +24,7 @@ fi
 if [[ -z "$DOWNSTREAM_BRANCH" ]]; then
   echo "Missing \$DOWNSTREAM_BRANCH"
   echo "Default to ${UPSTREAM_BRANCH}"
-  DOWNSTREAM_BREANCH=UPSTREAM_BRANCH
+  DOWNSTREAM_BRANCH=UPSTREAM_BRANCH
 fi
 
 if ! echo "$UPSTREAM_REPO" | grep '\.git'; then
@@ -28,7 +33,7 @@ fi
 
 echo "UPSTREAM_REPO=$UPSTREAM_REPO"
 
-git clone "https://github.com/${GITHUB_REPOSITORY}.git" work
+git clone "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" work
 cd work || { echo "Missing work dir" && exit 2 ; }
 
 git config user.name "${GITHUB_ACTOR}"
