@@ -2,7 +2,9 @@
 
 This is a Github Action used to merge changes from remote.  
 
-This is forked from [mheene](https://github.com/mheene/sync-upstream-repo), with me adding authentication using [GitHub Token](https://docs.github.com/en/actions/reference/authentication-in-a-workflow) and downstream branch options due to the [default branch naming changes](https://github.com/github/renaming).
+
+
+This is forked from [dabreadman](https://github.com/dabreadman/sync-upstream-repo), with me adding support for private branches.
 
 ## Use case
 
@@ -11,14 +13,12 @@ This is forked from [mheene](https://github.com/mheene/sync-upstream-repo), with
 
 ## Usage
 
-Example github action [here](https://github.com/THIS-IS-NOT-A-BACKUP/go-web-proxy/blob/main/.github/workflows/sync5.yml):
-
 ```YAML
 name: Sync Upstream
 
 env:
   # Required, URL to upstream (fork base)
-  UPSTREAM_URL: "https://github.com/dabreadman/go-web-proxy.git"
+  UPSTREAM_URL: "https://github.com/<user>/<repo>"
   # Required, token to authenticate bot, could use ${{ secrets.GITHUB_TOKEN }} 
   # Over here, we use a PAT instead to authenticate workflow file changes.
   WORKFLOW_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
@@ -38,7 +38,7 @@ env:
 # This runs every day on 1801 UTC
 on:
   schedule:
-    - cron: '1 18 * * *'
+    - cron: '1 0 * * *'
   # Allows manual workflow run (must in default branch to work)
   workflow_dispatch:
 
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: GitHub Sync to Upstream Repository
-        uses: dabreadman/sync-upstream-repo@v1.3.0
+        uses: Jai-JAP/sync-upstream-repo@v1.4.0
         with: 
           upstream_repo: ${{ env.UPSTREAM_URL }}
           upstream_branch: ${{ env.UPSTREAM_BRANCH }}
@@ -59,20 +59,7 @@ jobs:
           spawn_logs: ${{ env.SPAWN_LOGS }}
 ```
 
-This action syncs your repo (merge changes from `remote`) at branch `main` with the upstream repo ``` https://github.com/dabreadman/go-web-proxy.git ``` every day on 1801 UTC.  
+This action syncs your repo (merge changes from `remote`) at branch `main` with the upstream repo every day on 0000 UTC.  
 Do note GitHub Action scheduled workflow usually face delay as it is pushed onto a queue, the delay is usually within 1 hour long.
 
 Note: If `SPAWN_LOGS` is set to `true`, this action will create a `sync-upstream-repo` file at root directory with timestamps of when the action is ran. This is to mitigate the hassle of GitHub disabling actions for a repo when inactivity was detected.
-
-## Development
-
-In [`action.yml`](https://github.com/dabreadman/sync-upstream-repo/blob/master/action.yml), we define `inputs`.  
-We then pass these arguments into [`Dockerfile`](https://github.com/dabreadman/sync-upstream-repo/blob/master/Dockerfile), which then passed onto [`entrypoint.sh`](https://github.com/dabreadman/sync-upstream-repo/blob/master/entrypoint.sh).
-
-`entrypoint.sh` does the heavy-lifting,
-
-- Set up variables.
-- Set up git config.
-- Clone downstream repository.
-- Fetch upstream repository.
-- Attempt merge if behind, and push to downstream.
